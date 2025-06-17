@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>School AI Assistant</title>
+  <script src="https://cdn.jsdelivr.net/npm/botui/build/botui.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/botui/build/botui.min.css" />
+  <style>
+    body { font-family: sans-serif; padding: 20px; background: #f0f0f0; }
+    #botui-app { max-width: 600px; margin: auto; background: white; padding: 10px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h2 style="text-align:center;">School AI Assistant</h2>
+  <div id="botui-app"></div>
+
+  <script>
+    const knowledge = {
+      timetable: {
+        en: "School starts at 7:30 AM and ends at 1:30 PM Monday to Thursday. On Friday, school ends at 12:00 PM.",
+        bm: "Sekolah bermula 7:30 pagi dan tamat 1:30 tengahari Isnin hingga Khamis. Jumaat tamat 12:00 tengahari."
+      },
+      uniform: {
+        en: "Official uniform: white shirt, dark blue trousers. Black shoes.",
+        bm: "Pakaian rasmi: baju kemeja putih, seluar biru tua. Kasut hitam."
+      },
+      exam_dates: {
+        en: "UPSR: 5-9 September 2025. PT3: 10-15 October 2025.",
+        bm: "UPSR: 5-9 September 2025. PT3: 10-15 Oktober 2025."
+      },
+      grading_policy: {
+        en: "Pass mark: 40%. Coursework 30%, exam 70%.",
+        bm: "Markah lulus: 40%. Penilaian kerja kursus 30%, peperiksaan 70%."
+      },
+      staff_directory: {
+        en: "Headmaster: Mr Ahmad bin Ali. Senior Assistant: Mrs Siti bt Zainal.",
+        bm: "Guru Besar: En Ahmad bin Ali. Penolong Kanan: Pn Siti bt Zainal."
+      },
+      motivation: {
+        en: ["Stay positive and believe in yourself.", "Every challenge is an opportunity to grow."],
+        bm: ["Tetap positif dan yakin diri.", "Setiap cabaran adalah peluang untuk berkembang."]
+      }
+    };
+
+    let language = 'en';
+
+    const botui = new BotUI('botui-app');
+
+    botui.message.add({ content: 'Welcome / Selamat datang! Please choose a language / Sila pilih bahasa:' }).then(() => {
+      return botui.action.button({
+        action: [
+          { text: 'English', value: 'en' },
+          { text: 'BM', value: 'bm' }
+        ]
+      });
+    }).then(res => {
+      language = res.value;
+      greetUser();
+    });
+
+    function greetUser() {
+      botui.message.add({ content: language === 'en' ? 'How can I help you today?' : 'Bagaimana saya boleh bantu anda hari ini?' });
+      askQuestion();
+    }
+
+    function askQuestion() {
+      botui.action.text({
+        action: { placeholder: language === 'en' ? 'Type your question...' : 'Taip soalan anda...' }
+      }).then(res => {
+        const reply = getReply(res.value.toLowerCase());
+        botui.message.add({ content: reply }).then(() => askQuestion());
+      });
+    }
+
+    function getReply(input) {
+      if (input.includes('timetable') || input.includes('jadual')) return knowledge.timetable[language];
+      if (input.includes('uniform') || input.includes('pakaian')) return knowledge.uniform[language];
+      if (input.includes('exam') || input.includes('peperiksaan')) return knowledge.exam_dates[language];
+      if (input.includes('grading') || input.includes('markah')) return knowledge.grading_policy[language];
+      if (input.includes('staff') || input.includes('guru')) return knowledge.staff_directory[language];
+      if (input.includes('motivate') || input.includes('motivasi')) {
+        const tips = knowledge.motivation[language];
+        return tips[Math.floor(Math.random() * tips.length)];
+      }
+      return language === 'en' ? "Sorry, I don't have information on that." : "Maaf, saya tiada maklumat tentang itu.";
+    }
+  </script>
+</body>
+</html>
